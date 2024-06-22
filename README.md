@@ -44,6 +44,7 @@ jobs:
           AZURE_OPENAI_ENDPOINT: ${{ secrets.AZURE_OPENAI_ENDPOINT }}
           AZURE_OPENAI_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
           AZURE_OPENAI_DEPLOYMENT_ID: ${{ secrets.AZURE_OPENAI_API_KEY }}
+          RESPONSE_LANG_PROMPT: "please answer in English"
           exclude: "**/*.json, **/*.md" # Optional: exclude patterns separated by commas
 ```
 

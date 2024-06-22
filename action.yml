@@ -13,6 +13,10 @@ inputs:
   AZURE_OPENAI_DEPLOYMENT_ID:
     description: "Azure OpenAI API deployment ID"
     required: true
+  RESPONSE_LANG_PROMPT:
+    description: "specify the language of the response"
+    required: false
+    default: ""
   exclude:
     description: "Glob patterns to exclude files from the diff analysis"
     required: false

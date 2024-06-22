@@ -11,6 +11,7 @@ const AZURE_OPENAI_API_KEY: string = core.getInput("AZURE_OPENAI_API_KEY");
 const AZURE_OPENAI_DEPLOYMENT_ID: string = core.getInput(
   "AZURE_OPENAI_DEPLOYMENT_ID"
 );
+const RESPONSE_LANG_PROMPT: string = core.getInput("RESPONSE_LANG_PROMPT");
 
 const octokit = new Octokit({ auth: GITHUB_TOKEN });
 
@@ -111,6 +112,8 @@ ${chunk.changes
   .map((c) => `${c.ln ? c.ln : c.ln2} ${c.content}`)
   .join("\n")}
 \`\`\`
+
+${RESPONSE_LANG_PROMPT}
 `;
 }
 
