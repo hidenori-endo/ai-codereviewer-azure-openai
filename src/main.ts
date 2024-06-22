@@ -1,19 +1,22 @@
 import { readFileSync } from "fs";
 import * as core from "@actions/core";
-import OpenAI from "openai";
+import { AzureKeyCredential, OpenAIClient } from '@azure/openai';
 import { Octokit } from "@octokit/rest";
 import parseDiff, { Chunk, File } from "parse-diff";
 import minimatch from "minimatch";
 
 const GITHUB_TOKEN: string = core.getInput("GITHUB_TOKEN");
-const OPENAI_API_KEY: string = core.getInput("OPENAI_API_KEY");
-const OPENAI_API_MODEL: string = core.getInput("OPENAI_API_MODEL");
+const AZURE_OPENAI_ENDPOINT = core.getInput("AZURE_OPENAI_ENDPOINT");
+const AZURE_OPENAI_API_KEY: string = core.getInput("AZURE_OPENAI_API_KEY");
+const AZURE_OPENAI_DEPLOYMENT_ID: string = core.getInput("AZURE_OPENAI_DEPLOYMENT_ID");
 
 const octokit = new Octokit({ auth: GITHUB_TOKEN });
 
-const openai = new OpenAI({
-  apiKey: OPENAI_API_KEY,
-});
+const openai = new OpenAIClient(
+  AZURE_OPENAI_ENDPOINT,
+  new AzureKeyCredential(AZURE_OPENAI_API_KEY)
+);
+
 
 interface PRDetails {
   owner: string;
@@ -90,7 +93,7 @@ function createPrompt(file: File, chunk: Chunk, prDetails: PRDetails): string {
 Review the following code diff in the file "${
     file.to
   }" and take the pull request title and description into account when writing the response.
-  
+
 Pull request title: ${prDetails.title}
 Pull request description:
 
@@ -114,29 +117,25 @@ async function getAIResponse(prompt: string): Promise<Array<{
   lineNumber: string;
   reviewComment: string;
 }> | null> {
-  const queryConfig = {
-    model: OPENAI_API_MODEL,
-    temperature: 0.2,
+
+  const messages = [
+    {
+      role: "system",
+      content: prompt,
+    },
+  ];
+
+  const options = {
     max_tokens: 700,
+    temperature: 0.2,
     top_p: 1,
-    frequency_penalty: 0,
-    presence_penalty: 0,
-  };
+    frequencyPenalty: 0,
+    presencePenalty: 0,
+    responseFormat: { type: "json_object" }
+  }
 
   try {
-    const response = await openai.chat.completions.create({
-      ...queryConfig,
-      // return JSON if the model supports it:
-      ...(OPENAI_API_MODEL === "gpt-4-1106-preview"
-        ? { response_format: { type: "json_object" } }
-        : {}),
-      messages: [
-        {
-          role: "system",
-          content: prompt,
-        },
-      ],
-    });
+    const response = await openai.getChatCompletions(AZURE_OPENAI_DEPLOYMENT_ID, messages, options);
 
     const res = response.choices[0].message?.content?.trim() || "{}";
     return JSON.parse(res).reviews;
