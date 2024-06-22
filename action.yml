@@ -4,13 +4,15 @@ inputs:
   GITHUB_TOKEN:
     description: "GitHub token to interact with the repository."
     required: true
-  OPENAI_API_KEY:
-    description: "OpenAI API key for GPT."
+  AZURE_OPENAI_ENDPOINT:
+    description: "Azure OpenAI Endpoint key"
     required: true
-  OPENAI_API_MODEL:
-    description: "OpenAI API model."
-    required: false
-    default: "gpt-4"
+  AZURE_OPENAI_API_KEY:
+    description: "Azure OpenAI API key"
+    required: true
+  AZURE_OPENAI_DEPLOYMENT_ID:
+    description: "Azure OpenAI API deployment ID"
+    required: true
   exclude:
     description: "Glob patterns to exclude files from the diff analysis"
     required: false
