@@ -1,6 +1,6 @@
 import { readFileSync } from "fs";
 import * as core from "@actions/core";
-import { AzureKeyCredential, OpenAIClient } from '@azure/openai';
+import { AzureKeyCredential, OpenAIClient } from "@azure/openai";
 import { Octokit } from "@octokit/rest";
 import parseDiff, { Chunk, File } from "parse-diff";
 import minimatch from "minimatch";
@@ -8,7 +8,9 @@ import minimatch from "minimatch";
 const GITHUB_TOKEN: string = core.getInput("GITHUB_TOKEN");
 const AZURE_OPENAI_ENDPOINT = core.getInput("AZURE_OPENAI_ENDPOINT");
 const AZURE_OPENAI_API_KEY: string = core.getInput("AZURE_OPENAI_API_KEY");
-const AZURE_OPENAI_DEPLOYMENT_ID: string = core.getInput("AZURE_OPENAI_DEPLOYMENT_ID");
+const AZURE_OPENAI_DEPLOYMENT_ID: string = core.getInput(
+  "AZURE_OPENAI_DEPLOYMENT_ID"
+);
 
 const octokit = new Octokit({ auth: GITHUB_TOKEN });
 
@@ -16,7 +18,6 @@ const openai = new OpenAIClient(
   AZURE_OPENAI_ENDPOINT,
   new AzureKeyCredential(AZURE_OPENAI_API_KEY)
 );
-
 
 interface PRDetails {
   owner: string;
@@ -117,7 +118,6 @@ async function getAIResponse(prompt: string): Promise<Array<{
   lineNumber: string;
   reviewComment: string;
 }> | null> {
-
   const messages = [
     {
       role: "system",
@@ -131,11 +131,15 @@ async function getAIResponse(prompt: string): Promise<Array<{
     top_p: 1,
     frequencyPenalty: 0,
     presencePenalty: 0,
-    responseFormat: { type: "json_object" }
-  }
+    responseFormat: { type: "json_object" },
+  };
 
   try {
-    const response = await openai.getChatCompletions(AZURE_OPENAI_DEPLOYMENT_ID, messages, options);
+    const response = await openai.getChatCompletions(
+      AZURE_OPENAI_DEPLOYMENT_ID,
+      messages,
+      options
+    );
 
     const res = response.choices[0].message?.content?.trim() || "{}";
     return JSON.parse(res).reviews;
